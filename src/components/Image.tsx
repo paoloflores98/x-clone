@@ -7,7 +7,7 @@ type ImageType = {
   w?: number
   h?: number
   alt: string
-  tr?: boolean // Transformation. Propop de ImageKit
+  tr?: boolean // Transformation. Propio de ImageKit
 }
 
 const urlEndpoint = process.env.NEXT_PUBLIC_URL_ENDPOINT
