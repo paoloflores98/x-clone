@@ -1,7 +1,7 @@
 "use client"
 import { IKImage } from "imagekitio-next"
 
-type ImageType = {
+interface ImageType {
   className?: string
   path: string
   w?: number
@@ -25,7 +25,7 @@ const Image = ({ className, path, w, h, alt, tr }: ImageType) => {
       {...(tr // Verificar si la transfomación es true o false
         ? { transformation: [{ width: `${w}`, height: `${h}` }] }
         : { width: w, height: h })}
-      // lqip={{ active: true, quality: 20 }}
+      lqip={{ active: true, quality: 20 }}
       alt={alt}
     />
   )
