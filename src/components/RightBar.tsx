@@ -1,7 +1,7 @@
 import Link from "next/link"
-import PopularTags from "./right/PopularTags"
-import Recommendations from "./right/Recommendations"
-import Search from "./right/Search"
+import PopularTags from "./PopularTags"
+import Recommendations from "./Recommendations"
+import Search from "./Search"
 
 export default function RightBar() {
   return (
