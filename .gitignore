@@ -2,6 +2,7 @@
 *.url
 *.mp4
 *.srt
+/others
 
 # dependencies
 /node_modules
