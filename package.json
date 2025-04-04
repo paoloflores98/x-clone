@@ -12,6 +12,7 @@
     "seed": "ts-node --compiler-options {\"module\":\"CommonJS\"} prisma/seed.ts"
   },
   "dependencies": {
+    "@clerk/elements": "^0.23.9",
     "@clerk/nextjs": "^6.13.0",
     "@prisma/client": "^6.5.0",
     "imagekit": "^6.0.0",
