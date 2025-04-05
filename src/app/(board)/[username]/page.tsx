@@ -1,8 +1,29 @@
 import Feed from "@/components/Feed"
 import Image from "@/components/Image"
+import { prisma } from "@/prisma"
 import Link from "next/link"
+import { notFound } from "next/navigation"
 
-export default function UserPage() {
+interface Props {
+  params: Promise<{
+    username: string
+  }>
+}
+
+export default async function UserPage({ params }: Props) {
+  const { username } = await params
+
+  const user = await prisma.user.findUnique({
+    where: {
+      username
+    }
+  })
+
+  // Verificar si el usuario no existe. Ej.: http://localhost:3000/martin
+  if (!user) return notFound()
+
+  // console.log('Usuario', user)
+
   return (
     <div className="">
       {/* Título del perfil */}
@@ -91,7 +112,7 @@ export default function UserPage() {
       </div>
 
       {/* Feed */}
-      <Feed /> {/* Componente */}
+      <Feed userProfileId={user.id} /> {/* Componente */}
     </div>
   )
 }

@@ -3,7 +3,7 @@ import { PrismaClient } from '@prisma/client'
 const prisma = new PrismaClient()
 
 async function main() {
-  // Create 5 users with unique details
+  // Crear 5 usuarios con datos únicos
   const users = []
   for (let i = 1; i <= 5; i++) {
     const user = await prisma.user.create({
@@ -20,9 +20,9 @@ async function main() {
     })
     users.push(user)
   }
-  console.log(`${users.length} users created.`)
+  console.log(`${users.length} usuarios creados.`)
 
-  // Create 5 posts for each user
+  // Crear 5 posts para cada usuario
   const posts = []
   for (let i = 0; i < users.length; i++) {
     for (let j = 1; j <= 5; j++) {
@@ -35,9 +35,9 @@ async function main() {
       posts.push(post)
     }
   }
-  console.log('Posts created.')
+  console.log('Posts creados.')
 
-  // Create some follows
+  // Crear algunos follows
   await prisma.follow.createMany({
     data: [
       { followerId: users[0].id, followingId: users[1].id },
@@ -47,9 +47,9 @@ async function main() {
       { followerId: users[3].id, followingId: users[0].id },
     ],
   })
-  console.log('Follows created.')
+  console.log('Follows creados.')
 
-  // Create some likes
+  // Crear algunos likes
   await prisma.like.createMany({
     data: [
       { userId: users[0].id, postId: posts[0].id },
@@ -59,9 +59,9 @@ async function main() {
       { userId: users[4].id, postId: posts[4].id },
     ],
   })
-  console.log('Likes created.')
+  console.log('Likes creados.')
 
-  // Create some comments (each comment is a post linked to a parent post)
+  // Crear algunos comentarios (cada comentario es un post vinculado a un post padre)
   const comments = []
   for (let i = 0; i < posts.length; i++) {
     const comment = await prisma.post.create({
@@ -73,23 +73,23 @@ async function main() {
     })
     comments.push(comment)
   }
-  console.log('Comments created.')
+  console.log('Comentarios creados.')
 
-  // Create reposts using the Post model's rePostId
+  // Crear reposts utilizando el rePostId del modelo Post
   const reposts = []
   for (let i = 0; i < posts.length; i++) {
     const repost = await prisma.post.create({
       data: {
         desc: `Repost of Post ${posts[i].id} by ${users[(i + 2) % 5].username}`,
-        userId: users[(i + 2) % 5].id, // The user who is reposting
-        rePostId: posts[i].id, // Linking to the original post being reposted
+        userId: users[(i + 2) % 5].id, // El usuario que reenvía
+        rePostId: posts[i].id, // Enlace al mensaje original que se vuelve a publicar
       },
     })
     reposts.push(repost)
   }
-  console.log('Reposts created.')
+  console.log('Reposts creados.')
 
-  // Create saved posts (users save posts they like)
+  // Crear posts guardadas (los usuarios guardan los posts que les gustan)
   await prisma.savedPosts.createMany({
     data: [
       { userId: users[0].id, postId: posts[1].id },
@@ -99,7 +99,7 @@ async function main() {
       { userId: users[4].id, postId: posts[0].id },
     ],
   })
-  console.log('Saved posts created.')
+  console.log('Posts guardados creados.')
 }
 
 main()

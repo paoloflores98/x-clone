@@ -12,8 +12,9 @@ export default function Homepage() {
         <Link className="hidden pb-3 md:flex items-center" href="/">Javascript</Link>
         <Link className="hidden pb-3 md:flex items-center" href="/">CSS</Link>
       </div>
-      <Share />
-      <Feed />
+
+      <Share /> {/* Componente */}
+      <Feed /> {/* Componente */}
     </div>
   )
 }
