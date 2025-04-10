@@ -1,5 +1,12 @@
 import "./globals.css"
+import { Metadata } from "next"
 import { ClerkProvider } from "@clerk/nextjs"
+import QueryProvider from "@/providers/QueryProvider"
+
+export const metadata: Metadata = {
+  title: "Lama Dev X Clone",
+  description: "Next.js social media application project",
+}
 
 export default function AppLayout({
   children,
@@ -9,11 +16,13 @@ export default function AppLayout({
   return (
     // Proveedor Clerk
     <ClerkProvider>
-      <html lang="en">
-        <body>
-          {children}
-        </body>
-      </html>
+      <QueryProvider>
+        <html lang="en">
+          <body>
+            {children}
+          </body>
+        </html>
+      </QueryProvider>
     </ClerkProvider>
   )
 }

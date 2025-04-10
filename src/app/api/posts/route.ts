@@ -1,22 +1,22 @@
 import { prisma } from "@/prisma"
-import Post from "./Post"
 import { auth } from "@clerk/nextjs/server"
-import InfiniteFeed from "./InfiniteFeed"
+import { NextRequest } from "next/server"
 
-interface Props {
-  userProfileId?: string
-}
+export async function GET(request: NextRequest) {
+  const searchParams = request.nextUrl.searchParams // Acceder a los parámetros URL
+  const userProfileId = searchParams.get("user") // Obtener el parámetro "user"
+  const page = searchParams.get("cursor") // Obtener el parámetro "cursor"
+  const LIMIT = 3
 
-export default async function Feed({ userProfileId }: Props) {
   const { userId } = await auth() // Obtener el ID del usuario desde Clerk
 
   // Verificar si el ID del usuario existe
   if (!userId) return
 
-  const whereCondition = userProfileId
+  const whereCondition = userProfileId !== "undefined"
     ? { // Mostrar los posts del usuario correspondiente
       parentPostId: null, // No obtener comentarios
-      userId: userProfileId
+      userId: userProfileId as string
     }
     : { // Mostrar los posts del usuario correspondiente y de los usuarios seguidos
       parentPostId: null, // No obtener comentarios
@@ -33,24 +33,18 @@ export default async function Feed({ userProfileId }: Props) {
       },
     }
 
-    const posts = await prisma.post.findMany({
-      where: whereCondition,
-      take: 3, // Obtener los primeros 3 elementos
-      skip: 0, // Omitir 0 elementos
-      orderBy: {
-        createdAt: "desc"
-      }
-    })
+  const posts = await prisma.post.findMany({
+    where: whereCondition,
+    take: LIMIT,
+    skip: (Number(page) - 1) * LIMIT
+  })
 
-  return (
-    <div className="">
-      {posts.map(post => (
-        <div key={post.id}>
-          <Post post={post} /> {/* Componente */}
-        </div>
-      ))}
+  const totalPosts = await prisma.post.count({ // Contar los posts
+    where: whereCondition
+  })
 
-      <InfiniteFeed /> {/* Componente */}
-    </div>
-  )
+  // Verificar si se cuenta con más posts o no
+  const hasMore = Number(page) * LIMIT < totalPosts
+
+  return Response.json({ posts, hasMore })
 }
