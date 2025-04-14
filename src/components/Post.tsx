@@ -1,8 +1,6 @@
-import { imagekit } from "@/utils"
 import Image from "./Image"
 import PostInfo from "./PostInfo"
 import PostInteractions from "./PostInteractions"
-import Video from "./Video"
 import Link from "next/link"
 import { Post as PostType } from "@prisma/client"
 import { format } from "timeago.js"
@@ -13,7 +11,7 @@ interface Props {
 }
 
 interface PostWithDetail {
-
+  
 }
 
 export default function Post({ type, post }: Props) {

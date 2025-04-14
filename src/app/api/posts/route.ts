@@ -1,9 +1,9 @@
 import { prisma } from "@/prisma"
 import { auth } from "@clerk/nextjs/server"
-import { NextRequest } from "next/server"
+import { NextRequest, NextResponse } from "next/server"
 
 export async function GET(request: NextRequest) {
-  const searchParams = request.nextUrl.searchParams // Acceder a los parámetros URL
+  const { searchParams } = request.nextUrl // Acceder a los parámetros URL
   const userProfileId = searchParams.get("user") // Obtener el parámetro "user"
   const page = searchParams.get("cursor") // Obtener el parámetro "cursor"
   const LIMIT = 3
@@ -39,12 +39,13 @@ export async function GET(request: NextRequest) {
     skip: (Number(page) - 1) * LIMIT
   })
 
-  const totalPosts = await prisma.post.count({ // Contar los posts
+  // Contar los posts
+  const totalPosts = await prisma.post.count({
     where: whereCondition
   })
 
   // Verificar si se cuenta con más posts o no
   const hasMore = Number(page) * LIMIT < totalPosts
 
-  return Response.json({ posts, hasMore })
+  return NextResponse.json({ posts, hasMore })
 }
