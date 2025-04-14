@@ -35,6 +35,13 @@ export default async function Feed({ userProfileId }: Props) {
 
     const posts = await prisma.post.findMany({
       where: whereCondition,
+      include: {user: {
+        select: {
+          displayName: true,
+          username: true,
+          img: true
+        }
+      }},
       take: 3, // Obtener los primeros 3 elementos
       skip: 0, // Omitir 0 elementos
       orderBy: {
