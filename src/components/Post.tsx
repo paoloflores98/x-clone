@@ -102,7 +102,7 @@ export default function Post({ type, post }: Props) {
           </div>
 
           {/* Texto y multimedia */}
-          <Link href={`/lamaWebDev/status/123`}>
+          <Link href={`/${originalPost.user.username}/status/123`}>
             <p className={`${type === "status" && "text-lg"}`}>
               {originalPost.desc}
             </p>

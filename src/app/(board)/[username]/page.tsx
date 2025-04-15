@@ -1,6 +1,8 @@
 import Feed from "@/components/Feed"
+import FollowButton from "@/components/FollowButton"
 import Image from "@/components/Image"
 import { prisma } from "@/prisma"
+import { auth, User } from "@clerk/nextjs/server"
 import Link from "next/link"
 import { notFound } from "next/navigation"
 
@@ -12,17 +14,18 @@ interface Props {
 
 export default async function UserPage({ params }: Props) {
   const { username } = await params
-
+  const { userId } = await auth() // Obtener el ID del usuario desde Clerk
   const user = await prisma.user.findUnique({
-    where: {
-      username
+    where: { username },
+    include: {
+      _count: { select: { followers: true, followings: true } },
+      followings: userId ? { where: { followerId: userId } } : undefined
     }
   })
 
+  console.log("ID", userId)
   // Verificar si el usuario no existe. Ej.: http://localhost:3000/martin
   if (!user) return notFound()
-
-  // console.log('Usuario', user)
 
   return (
     <div className="">
@@ -36,7 +39,7 @@ export default async function UserPage({ params }: Props) {
             h={24}
           />
         </Link>
-        <h1 className="font-bold text-lg">Post</h1>
+        <h1 className="font-bold text-lg">{user.displayName}</h1>
       </div>
 
       {/* Infor */}
@@ -45,12 +48,12 @@ export default async function UserPage({ params }: Props) {
         <div className="relative w-full">
           {/* Portada */}
           <div className="w-full aspect-[3/1] relative">
-            <Image path="general/cover.jpg" alt="" w={600} h={200} tr={true} /> {/* Componente */}
+            <Image path={user.cover || "general/noCover.png"} alt="" w={600} h={200} tr={true} /> {/* Componente */}
           </div>
 
           {/* Avatar */}
           <div className="w-1/5 aspect-square rounded-full overflow-hidden border-4 border-black bg-gray-300 absolute left-4 -translate-y-1/2">
-            <Image path="general/avatar.png" alt="" w={100} h={100} tr={true} /> {/* Componente */}
+            <Image path={user.img || "general/noAvatar.png"} alt="" w={100} h={100} tr={true} /> {/* Componente */}
           </div>
 
           {/* Enlaces */}
@@ -64,28 +67,36 @@ export default async function UserPage({ params }: Props) {
             <div className="w-9 h-9 flex items-center justify-center rounded-full border-[1px] border-gray-500 cursor-pointer">
               <Image path="icons/message.svg" alt="" w={20} h={20} /> {/* Componente */}
             </div>
-            <button className="py-2 px-4 bg-white text-black font-bold rounded-full">Seguir</button>
+            
+            {userId && 
+              <FollowButton // Componente
+                userId={user.id}
+                isFollowed={!!user.followings.length}
+              /> 
+            }
           </div>
 
           {/* Detalles del usuario */}
           <div className="p-4 flex flex-col gap-2">
             {/* Nombre de usuario y Handle */}
             <div className="">
-              <h1 className="text-2xl font-bold">Lama Dev</h1>
-              <span className="text-textGray text-sm">@lamaWebDev</span>
+              <h1 className="text-2xl font-bold">{user.displayName}</h1>
+              <span className="text-textGray text-sm">@{user.username}</span>
             </div>
-            <p>Lama Dev Youtube Channel</p>
+            {user.bio && <p>{user.bio} Channel</p>}
             {/* Puesto, Lugar y Fecha */}
             <div className="flex gap-4 text-textGray text-[15px]">
-              <div className="flex items-center gap-2">
-                <Image // Componente
-                  path="icons/userLocation.svg"
-                  alt="location"
-                  w={20}
-                  h={20}
-                />
-                <span>USA</span>
-              </div>
+              {user.location && (
+                <div className="flex items-center gap-2">
+                  <Image // Componente
+                    path="icons/userLocation.svg"
+                    alt="location"
+                    w={20}
+                    h={20}
+                  />
+                  <span>{user.location}</span>
+                </div>
+              )}
               <div className="flex items-center gap-2">
                 <Image // Componente
                   path="icons/date.svg"
@@ -93,18 +104,22 @@ export default async function UserPage({ params }: Props) {
                   w={20}
                   h={20}
                 />
-                <span>Joined May 2021</span>
+                <span>Se unió en {new Date(user.createdAt.toString()).toLocaleDateString(
+                  "es-ES", {
+                    month: "long", year: "numeric"
+                    }
+                  )}</span>
               </div>
             </div>
             {/* Seguidores y Seguidos */}
             <div className="flex gap-4">
               <div className="flex items-center gap-2">
-                <span className="font-bold">100</span>
-                <span className="text-textGray text-[15px]">Followers</span>
+                <span className="font-bold">{user._count.followers}</span>
+                <span className="text-textGray text-[15px]">Seguidores</span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="font-bold">100</span>
-                <span className="text-textGray text-[15px]">Followings</span>
+                <span className="font-bold">{user._count.followings}</span>
+                <span className="text-textGray text-[15px]">Siguiendo</span>
               </div>
             </div>
           </div>
