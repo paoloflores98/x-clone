@@ -33,21 +33,30 @@ export default async function Feed({ userProfileId }: Props) {
       },
     }
 
-    const posts = await prisma.post.findMany({
-      where: whereCondition,
-      include: {user: {
-        select: {
-          displayName: true,
-          username: true,
-          img: true
+  const posts = await prisma.post.findMany({
+    where: whereCondition,
+    include: {
+      user: { select: { displayName: true, username: true, img: true } },
+      rePost: {
+        include: {
+          user: { select: { displayName: true, username: true, img: true } },
+          _count: { select: { likes: true, rePosts: true, comments: true } },
+          likes: { where: { userId: userId, }, select: { id: true } },
+          rePosts: { where: { userId: userId, }, select: { id: true } },
+          saves: { where: { userId: userId, }, select: { id: true } },
         }
-      }},
-      take: 3, // Obtener los primeros 3 elementos
-      skip: 0, // Omitir 0 elementos
-      orderBy: {
-        createdAt: "desc"
-      }
-    })
+      },
+      _count: { select: { likes: true, rePosts: true, comments: true } },
+      likes: { where: { userId: userId, }, select: { id: true } },
+      rePosts: { where: { userId: userId, }, select: { id: true } },
+      saves: { where: { userId: userId, }, select: { id: true } },
+    },
+    take: 3, // Obtener los primeros 3 elementos
+    skip: 0, // Omitir 0 elementos
+    orderBy: {
+      createdAt: "desc"
+    }
+  })
 
   return (
     <div className="">
