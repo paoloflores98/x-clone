@@ -9,6 +9,7 @@ interface Props {
 
 const fetchPosts = async (pageParam: number, userProfileId?: string) => {
   const response = await fetch(`http://localhost:3000/api/posts?cursor=${pageParam}&user=${userProfileId}`)
+  // const response = await fetch(`https://abf5-38-253-148-65.ngrok-free.app/api/posts?cursor=${pageParam}&user=${userProfileId}`)
 
   return response.json()
 }

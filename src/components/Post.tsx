@@ -5,27 +5,26 @@ import Link from "next/link"
 import { Post as PostType } from "@prisma/client"
 import { format } from "timeago.js"
 
-type PostWithDetails = PostType & {
-  user: {
-    displayName: string | null
-    username: string
-    img: string | null
+type UserSummary = {
+  displayName: string | null
+  username: string
+  img: string | null
+}
+
+type Engagement = {
+  _count: {
+    likes: number
+    rePosts: number
+    comments: number
   }
-  repost?: PostType & {
-    user: {
-      displayName: string | null
-      username: string
-      img: string | null
-    }
-    _count: { likes: number, rePosts: number, comments: number }
-    likes: { id: number }[]
-    rePosts: { id: number }[]
-    saves: { id: number }[]
-  }
-  _count: { likes: number, rePosts: number, comments: number }
   likes: { id: number }[]
   rePosts: { id: number }[]
   saves: { id: number }[]
+}
+
+type PostWithDetails = PostType & Engagement & {
+  user: UserSummary
+  rePost?: (PostType & Engagement & { user: UserSummary }) | null
 }
 
 interface Props {
@@ -33,9 +32,8 @@ interface Props {
   post: PostWithDetails
 }
 
-
 export default function Post({ type, post }: Props) {
-  const originalPost = post.repost || post
+  const originalPost = post.rePost || post
 
   return (
     <div className="p-4 border-y-[1px] border-borderGray">
@@ -102,7 +100,7 @@ export default function Post({ type, post }: Props) {
           </div>
 
           {/* Texto y multimedia */}
-          <Link href={`/${originalPost.user.username}/status/123`}>
+          <Link href={`/${originalPost.user.username}/status/${originalPost.id}`}>
             <p className={`${type === "status" && "text-lg"}`}>
               {originalPost.desc}
             </p>
@@ -117,9 +115,10 @@ export default function Post({ type, post }: Props) {
           )}
 
           <PostInteractions // Componente
+            postId={originalPost.id}
             count={originalPost._count}
             isLiked={!!originalPost.likes.length}
-            isRespoted={!!originalPost.rePosts.length}
+            isRePosted={!!originalPost.rePosts.length}
             isSaved={!!originalPost.saves.length}
           />
         </div>

@@ -1,17 +1,99 @@
 "use client"
 
+import { rePost, likePost, savePost } from "@/action"
+import { useOptimistic, useState } from "react"
+
 interface Props {
+  postId: number
   count: {
     likes: number
     rePosts: number
     comments: number
   }
   isLiked: boolean
-  isRespoted: boolean
+  isRePosted: boolean
   isSaved: boolean
 }
 
-export default function PostInteractions({ count, isLiked, isRespoted, isSaved }: Props) {
+export default function PostInteractions({ postId, count, isLiked, isRePosted, isSaved }: Props) {
+  const [state, setState] = useState({
+    likes: count.likes,
+    rePosts: count.rePosts,
+    isLiked,
+    isRePosted,
+    isSaved,
+  })
+
+  const rePostAction = async () => {
+    addOptimisticCount("rePost")
+    await rePost(postId) // Server action que se realiza realmente en el backend
+    setState(prev => {
+      return {
+        ...prev,
+        rePosts: prev.isRePosted ? prev.rePosts - 1 : prev.rePosts + 1,
+        isRePosted: !prev.isRePosted,
+      }
+    })
+  }
+  
+  const likeAction = async () => {
+    addOptimisticCount("like")
+    await likePost(postId) // Server action que se realiza realmente en el backend
+    setState(prev => {
+      return {
+        ...prev,
+        likes: prev.isLiked ? prev.likes - 1 : prev.likes + 1,
+        isLiked: !prev.isLiked,
+      }
+    })
+  }
+
+  const saveAction = async () => {
+    addOptimisticCount("save")
+    await savePost(postId) // Server action que se realiza realmente en el backend
+    setState(prev => {
+      return {
+        ...prev,
+        isSaved: !prev.isSaved,
+      }
+    })
+  }
+
+  /**
+   * optimisticCount: Mostrar los valores actualizados de la UI, incluso antes de que el servidor confirme.
+   * addOptimisticCount: Modificar el estado de la UI antes de que el backend confirme el resultado
+   * state: Estado inicial que contiene los valores originales y que se van a optimizar
+   * arrow function: Actualizar el estado de manera optimista en función de un tipo de acción (like, rePost, save)
+   */
+  const [optimisticCount, addOptimisticCount] = useOptimistic(
+    state,
+    (prev, type: "like" | "rePost" | "save") => {
+      if (type === "like") {
+        return {
+          ...prev,
+          likes: prev.isLiked ? prev.likes - 1 : prev.likes + 1,
+          isLiked: !prev.isLiked,
+        }
+      }
+
+      if (type === "rePost") {
+        return {
+          ...prev,
+          rePosts: prev.isRePosted ? prev.rePosts - 1 : prev.rePosts + 1,
+          isRePosted: !prev.isRePosted,
+        }
+      }
+
+      if (type === "save") {
+        return {
+          ...prev,
+          isSaved: !prev.isSaved,
+        }
+      }
+
+      return prev
+    })
+
   return (
     <div className="flex items-center justify-between gap-4 lg:gap-16 my-2 text-textGray">
       <div className="flex items-center justify-between flex-1">
@@ -32,41 +114,45 @@ export default function PostInteractions({ count, isLiked, isRespoted, isSaved }
         </div>
 
         {/* Repostear */}
-        <div className="flex items-center gap-2 cursor-pointer group">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-          >
-            <path
-              className={`${isRespoted ? "fill-iconGreen" : "fill-textGray"} group-hover:fill-iconGreen`}
-              d="M4.75 3.79l4.603 4.3-1.706 1.82L6 8.38v7.37c0 .97.784 1.75 1.75 1.75H13V20H7.75c-2.347 0-4.25-1.9-4.25-4.25V8.38L1.853 9.91.147 8.09l4.603-4.3zm11.5 2.71H11V4h5.25c2.347 0 4.25 1.9 4.25 4.25v7.37l1.647-1.53 1.706 1.82-4.603 4.3-4.603-4.3 1.706-1.82L18 15.62V8.25c0-.97-.784-1.75-1.75-1.75z"
-            />
-          </svg>
-          <span className={`${isRespoted ? "text-iconGreen" : "text-textGray"}group-hover:text-iconGreen text-sm`}>{count.rePosts}</span>
-        </div>
+        <form action={rePostAction}>
+          <button className="flex items-center gap-2 cursor-pointer group">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+            >
+              <path
+                className={`${optimisticCount.isRePosted ? "fill-iconGreen" : "fill-textGray"} group-hover:fill-iconGreen`}
+                d="M4.75 3.79l4.603 4.3-1.706 1.82L6 8.38v7.37c0 .97.784 1.75 1.75 1.75H13V20H7.75c-2.347 0-4.25-1.9-4.25-4.25V8.38L1.853 9.91.147 8.09l4.603-4.3zm11.5 2.71H11V4h5.25c2.347 0 4.25 1.9 4.25 4.25v7.37l1.647-1.53 1.706 1.82-4.603 4.3-4.603-4.3 1.706-1.82L18 15.62V8.25c0-.97-.784-1.75-1.75-1.75z"
+              />
+            </svg>
+            <span className={`${optimisticCount.isRePosted ? "text-iconGreen" : "text-textGray"} group-hover:text-iconGreen text-sm`}>{optimisticCount.rePosts}</span>
+          </button>
+        </form>
 
         {/* Me gusta */}
-        <div className="flex items-center gap-2 cursor-pointer group">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-          >
-            <path
-              className={`${isLiked ? "fill-iconPink" : "fill-textGray"} group-hover:fill-iconPink`}
-              d="M16.697 5.5c-1.222-.06-2.679.51-3.89 2.16l-.805 1.09-.806-1.09C9.984 6.01 8.526 5.44 7.304 5.5c-1.243.07-2.349.78-2.91 1.91-.552 1.12-.633 2.78.479 4.82 1.074 1.97 3.257 4.27 7.129 6.61 3.87-2.34 6.052-4.64 7.126-6.61 1.111-2.04 1.03-3.7.477-4.82-.561-1.13-1.666-1.84-2.908-1.91zm4.187 7.69c-1.351 2.48-4.001 5.12-8.379 7.67l-.503.3-.504-.3c-4.379-2.55-7.029-5.19-8.382-7.67-1.36-2.5-1.41-4.86-.514-6.67.887-1.79 2.647-2.91 4.601-3.01 1.651-.09 3.368.56 4.798 2.01 1.429-1.45 3.146-2.1 4.796-2.01 1.954.1 3.714 1.22 4.601 3.01.896 1.81.846 4.17-.514 6.67z"
-            />
-          </svg>
-          <span className={`${isLiked ? "text-iconPink" : "text-textGray"} group-hover:text-iconPink text-sm`}>{count.likes}</span>
-        </div>
+        <form action={likeAction}>
+          <button className="flex items-center gap-2 cursor-pointer group">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+            >
+              <path
+                className={`${optimisticCount.isLiked ? "fill-iconPink" : "fill-textGray"} group-hover:fill-iconPink`}
+                d="M16.697 5.5c-1.222-.06-2.679.51-3.89 2.16l-.805 1.09-.806-1.09C9.984 6.01 8.526 5.44 7.304 5.5c-1.243.07-2.349.78-2.91 1.91-.552 1.12-.633 2.78.479 4.82 1.074 1.97 3.257 4.27 7.129 6.61 3.87-2.34 6.052-4.64 7.126-6.61 1.111-2.04 1.03-3.7.477-4.82-.561-1.13-1.666-1.84-2.908-1.91zm4.187 7.69c-1.351 2.48-4.001 5.12-8.379 7.67l-.503.3-.504-.3c-4.379-2.55-7.029-5.19-8.382-7.67-1.36-2.5-1.41-4.86-.514-6.67.887-1.79 2.647-2.91 4.601-3.01 1.651-.09 3.368.56 4.798 2.01 1.429-1.45 3.146-2.1 4.796-2.01 1.954.1 3.714 1.22 4.601 3.01.896 1.81.846 4.17-.514 6.67z"
+              />
+            </svg>
+            <span className={`${optimisticCount.isLiked ? "text-iconPink" : "text-textGray"} group-hover:text-iconPink text-sm`}>{optimisticCount.likes}</span>
+          </button>
+        </form>
       </div>
 
-      <div className="flex items-center gap-2">
-        {/* Guardado */}
-        <div className="cursor-pointer group">
+      <form className="flex items-center gap-2" action={saveAction}>
+        {/* Guardar */}
+        <button className="cursor-pointer group">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="20"
@@ -74,11 +160,11 @@ export default function PostInteractions({ count, isLiked, isRespoted, isSaved }
             viewBox="0 0 24 24"
           >
             <path
-              className={`${isSaved ? "fill-iconBlue" : "fill-textGray"} group-hover:fill-iconBlue`}
+              className={`${optimisticCount.isSaved ? "fill-iconBlue" : "fill-textGray"} group-hover:fill-iconBlue`}
               d="M4 4.5C4 3.12 5.119 2 6.5 2h11C18.881 2 20 3.12 20 4.5v18.44l-8-5.71-8 5.71V4.5zM6.5 4c-.276 0-.5.22-.5.5v14.56l6-4.29 6 4.29V4.5c0-.28-.224-.5-.5-.5h-11z"
             />
           </svg>
-        </div>
+        </button>
 
         {/* Descargar */}
         <div className="cursor-pointer group">
@@ -94,7 +180,7 @@ export default function PostInteractions({ count, isLiked, isRespoted, isSaved }
             />
           </svg>
         </div>
-      </div>
+      </form>
     </div>
   )
 }
