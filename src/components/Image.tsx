@@ -3,7 +3,8 @@ import { IKImage } from "imagekitio-next"
 
 interface ImageType {
   className?: string
-  path: string
+  path?: string
+  src?: string
   w?: number
   h?: number
   alt: string
@@ -16,12 +17,13 @@ if (!urlEndpoint) {
   throw new Error('Error: Por favor, añada urlEndpoint a .env o .env.local')
 }
 
-const Image = ({ className, path, w, h, alt, tr }: ImageType) => {
+const Image = ({ className, path, src, w, h, alt, tr }: ImageType) => {
   return (
     <IKImage
       urlEndpoint={urlEndpoint}
       className={className}
       path={path}
+      src={src}
       {...(tr // Verificar si la transfomación es true o false
         ? { transformation: [{ width: `${w}`, height: `${h}` }] }
         : { width: w, height: h })}

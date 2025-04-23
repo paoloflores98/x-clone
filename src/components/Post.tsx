@@ -107,7 +107,12 @@ export default function Post({ type, post }: Props) {
           </Link>
 
           {originalPost.img && (
-            <Image path={originalPost.img} alt="" w={600} h={600} /> // Componente
+            <Image // Componente
+              path={originalPost.img}
+              alt=""
+              w={600}
+              h={originalPost.imgHeight || 600}
+            />
           )}
 
           {type === "status" && (

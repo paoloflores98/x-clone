@@ -1,17 +1,20 @@
 "use client"
-import { useState } from "react"
+import { useActionState, useState } from "react"
 import Image from "./Image"
 import NextImage from "next/image"
-import { shareAction } from "@/actions"
 import { ImageEditor } from "./ImageEditor"
+import { useUser } from "@clerk/nextjs"
+import { addPost } from "@/action"
+
+interface SettingsProps {
+  type: "original" | "wide" | "square"
+  sensitive: boolean
+}
 
 export default function Share() {
   const [media, setMedia] = useState<File | null>(null) // Retorna un archivo o null
   const [isEditorOpen, setIsEditorOpen] = useState(false) // Editor de la imagen previa
-  const [settings, setSettings] = useState<{ // Retorna un objeto con las propiedades type y sensitive
-    type: "original" | "wide" | "square"
-    sensitive: boolean
-  }>({
+  const [settings, setSettings] = useState<SettingsProps>({ // Retorna un objeto con las propiedades type y sensitive
     type: "original",
     sensitive: false,
   })
@@ -24,18 +27,32 @@ export default function Share() {
 
   const previewURL = media ? URL.createObjectURL(media) : null
 
+  // user: Objeto con información del usuario autenticado
+  const { user } = useUser()
+
+  /**
+   * state: Contiene el estado del server action. Puede tener un estado de success o error
+   * formAction: Valor que se utiliza para manejar el server action en el formulario
+   * isPending: Booleano si el server action está en proceso de ejecución
+   * addComment: Server action que se va a ejecutar
+   * {success: false, error: false}: Estado inicial del server action
+   */
+  const [state, formAction, isPending] = useActionState(addPost, { success: false, error: false })
+
   return (
     <form
       className="p-4 flex gap-4"
-      action={(formData) => shareAction(formData, settings)}
+      action={formAction}
     >
       {/* Avatar */}
       <div className="relative w-10 h-10 rounded-full overflow-hidden">
-        <Image path="general/avatar.png" alt="" w={100} h={100} tr={true} />
+        <Image src={user?.imageUrl} alt="" w={100} h={100} tr={true} />
       </div>
 
       {/* Otros */}
       <div className="flex-1 flex flex-col gap-4">
+        <input type="text" name="imgType" value={settings.type} hidden readOnly />
+        <input type="text" name="isSensitive" value={settings.sensitive ? "true" : "false"} hidden readOnly />
         <input
           type="text"
           name="desc"
@@ -47,13 +64,12 @@ export default function Share() {
         {media?.type.includes("image") && previewURL && ( // Verificar si el archivo es una imagen
           <div className="relative rounded-xl overflow-hidden">
             <NextImage
-              className={`w-full ${
-                settings.type === "original"
-                  ? "h-full object-contain"
-                  : settings.type === "square"
+              className={`w-full ${settings.type === "original"
+                ? "h-full object-contain"
+                : settings.type === "square"
                   ? "aspect-square object-cover"
                   : "aspect-video object-cover"
-              }`}
+                }`}
               src={previewURL}
               alt=""
               width={600}
@@ -109,7 +125,13 @@ export default function Share() {
             <Image className="cursor-pointer" path="icons/schedule.svg" alt="" w={20} h={20} /> {/* Componente */}
             <Image className="cursor-pointer" path="icons/location.svg" alt="" w={20} h={20} /> {/* Componente */}
           </div>
-          <button className="bg-white text-black font-bold rounded-full py-2 px-4 cursor-pointer">Post</button>
+          <button
+            className="bg-white text-black font-bold rounded-full py-2 px-4 disabled:cursor-not-allowed"
+            disabled={isPending}
+          >{isPending ? "Posteando" : "Postear"}</button>
+          {state.error && (
+            <span className="text-red-300 p-4">¡Algo salió mal!</span>
+          )}
         </div>
       </div>
     </form>
