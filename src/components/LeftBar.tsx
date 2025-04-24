@@ -3,6 +3,7 @@ import Image from "./Image"
 import Socket from "./Socket"
 import Notification from "./Notification";
 import { currentUser } from "@clerk/nextjs/server";
+import Logout from "./Logout";
 
 const menuList = [
   {
@@ -126,28 +127,34 @@ export default async function LeftBar() {
           href="/compose/post"
         >Post</Link>
       </div>
+      
+      {user && (
+        <>
+          <Socket /> {/* Componente */}
 
-      <Socket /> {/* Componente */}
+          {/* Usuario */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <div className="w-10 h-10 relative rounded-full overflow-hidden">
+                <Image // Componente
+                  src={user?.imageUrl}
+                  alt="Paolo Flores"
+                  w={100}
+                  h={100}
+                  tr={true}
+                />
+              </div>
+              <div className="hidden xxl:flex flex-col">
+                <span className="font-bold">{user?.username}</span>
+                <span className="text-sm text-textGray">@{user?.username}</span>
+              </div>
+            </div>
+            {/* <div className="hidden xxl:block cursor-pointer font-bold">...</div> */}
 
-      {/* Usuario */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <div className="w-10 h-10 relative rounded-full overflow-hidden">
-            <Image // Componente
-              path="/general/avatar.png"
-              alt="Paolo Flores"
-              w={100}
-              h={100}
-              tr={true}
-            />
-          </div>
-          <div className="hidden xxl:flex flex-col">
-            <span className="font-bold">Paolo Flores</span>
-            <span className="text-sm text-textGray">@paoloflores98</span>
-          </div>
-        </div>
-        <div className="hidden xxl:block cursor-pointer font-bold">...</div>
-      </div>
+            <Logout />
+          </div>        
+        </>
+      )}
     </div>
   )
 }

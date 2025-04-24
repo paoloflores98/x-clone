@@ -43,7 +43,7 @@ export default function Notification() {
       >
         <div className="relative">
           <Image path="icons/notification.svg" alt="" w={24} h={24} /> {/* Componente */}
-          
+
           {notifications.length > 0 && (
             <div className="absolute -top-4 -right-4 w-6 h-6 bg-iconBlue p-2 rounded-full flex items-center justify-center text-sm">
               {notifications.length}
@@ -55,30 +55,39 @@ export default function Notification() {
 
       {open && (
         <div className="absolute -right-full p-4 rounded-lg bg-white text-black flex flex-col gap-4 w-max">
-          <h1 className="text-xl text-textGray">Notificaciones</h1>
+          {notifications.length > 0
+            ? (
+              <>
+                <h1 className="text-xl text-textGray">Notificaciones</h1>
 
-          {notifications.map((n) => (
-            <div
-              className="cursor-pointer"
-              key={n.id}
-              onClick={() => handleClick(n)}
-            >
-              <b>{n.senderUsername}</b>{" "}
-              {n.type === "like"
-                ? "le gustó tu post"
-                : n.type === "rePost"
-                  ? "reposteó tu post"
-                  : n.type === "comment"
-                    ? "respondió tu post"
-                    : "empezó a seguirte"
-              }
-            </div>
-          ))}
+                {notifications.map((n) => (
+                  <div
+                    className="cursor-pointer"
+                    key={n.id}
+                    onClick={() => handleClick(n)}
+                  >
+                    <b>{n.senderUsername}</b>{" "}
+                    {n.type === "like"
+                      ? "le gustó tu post"
+                      : n.type === "rePost"
+                        ? "reposteó tu post"
+                        : n.type === "comment"
+                          ? "respondió tu post"
+                          : "empezó a seguirte"
+                    }
+                  </div>
+                ))}
 
-          <button
-            className="bg-black text-white p-2 text-sm rounded-lg"
-            onClick={reset}
-          >Marcar como leído</button>
+                <button
+                  className="bg-black text-white p-2 text-sm rounded-lg"
+                  onClick={reset}
+                >Marcar como leído</button>
+              </>
+            )
+            : (
+              <h1 className="text-xl text-textGray">No tiene notificaciones</h1>
+            )
+          }
         </div>
       )}
     </div>
