@@ -59,7 +59,7 @@ export default function Post({ type, post }: Props) {
       {/* Contenido del post */}
       <div className={`flex gap-4 ${type === "status" && "flex-col"}`}>
         {/* Avatar */}
-        <div className={`${type === "status" && "hidden"} relative w-10 h-10 rounded-full overflow-hidden`}>
+        <div className={`${type === "status" && "hidden"} relative w-10 h-10 rounded-full overflow-hidden -z-10`}>
           <Image
             path={originalPost.user.img || "general/noAvatar.png"}
             alt=""
@@ -75,7 +75,7 @@ export default function Post({ type, post }: Props) {
           <div className="w-full flex justify-between">
             <Link className="flex gap-4" href={`/${originalPost.user.username}`}>
               {/* Avatar */}
-              <div className={`${type !== "status" && "hidden"} relative w-10 h-10 rounded-full overflow-hidden`}>
+              <div className={`${type !== "status" && "hidden"} relative w-10 h-10 rounded-full overflow-hidden -z-10`}>
                 <Image
                   path={originalPost.user.img || "general/noAvatar.png"}
                   alt=""
@@ -120,6 +120,7 @@ export default function Post({ type, post }: Props) {
           )}
 
           <PostInteractions // Componente
+            username={originalPost.user.username}
             postId={originalPost.id}
             count={originalPost._count}
             isLiked={!!originalPost.likes.length}

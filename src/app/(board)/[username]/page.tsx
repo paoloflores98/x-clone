@@ -2,7 +2,7 @@ import Feed from "@/components/Feed"
 import FollowButton from "@/components/FollowButton"
 import Image from "@/components/Image"
 import { prisma } from "@/prisma"
-import { auth, User } from "@clerk/nextjs/server"
+import { auth } from "@clerk/nextjs/server"
 import Link from "next/link"
 import { notFound } from "next/navigation"
 
@@ -13,8 +13,9 @@ interface Props {
 }
 
 export default async function UserPage({ params }: Props) {
-  const { username } = await params
   const { userId } = await auth() // Obtener el ID del usuario desde Clerk
+  const { username } = await params
+  
   const user = await prisma.user.findUnique({
     where: { username },
     include: {

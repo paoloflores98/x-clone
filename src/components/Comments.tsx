@@ -3,8 +3,9 @@ import { useUser } from "@clerk/nextjs"
 import Image from "./Image"
 import Post from "./Post"
 import { Post as PostType } from "@prisma/client"
-import { useActionState } from "react"
+import { useActionState, useEffect } from "react"
 import { addComment } from "@/action"
+import { socket } from "@/socket"
 
 type CommentWithDetails = PostType & {
   user: {
@@ -39,7 +40,22 @@ export default function Comments({ comments, postId, username }: Props) {
    * addComment: Server action que se va a ejecutar
    * {success: false, error: false}: Estado inicial del server action
    */
-  const [state, formAction, isPending] = useActionState(addComment, {success: false, error: false})
+  const [state, formAction, isPending] = useActionState(addComment, { success: false, error: false })
+
+  useEffect(() => {
+    if (state.success) {
+      // Socket.io
+      socket.emit("sendNotification", {
+        receiverUsername: username,
+        data: {
+          senderUsername: user?.username,
+          type: "comment",
+          link: `/${username}/status/${postId}`,
+        },
+      })
+    }
+
+  }, [state.success, username, user?.username, postId])
 
   return (
     <div className="">
@@ -48,7 +64,7 @@ export default function Comments({ comments, postId, username }: Props) {
           className="flex items-center justify-between gap-4 p-4"
           action={formAction}
         >
-          <div className="relative w-10 h-10 rounded-full overflow-hidden">
+          <div className="relative w-10 h-10 rounded-full overflow-hidden -z-10">
             <Image
               src={user?.imageUrl}
               alt="Lama Dev"

@@ -84,6 +84,32 @@ export const savePost = async (postId: number) => {
   }
 }
 
+/* Seguir a un usuario */
+export const followUser = async (targetUserId: string) => {
+  const { userId } = await auth()
+
+  if (!userId) return
+
+  // Seguir del usuario
+  const existingFollow = await prisma.follow.findFirst({
+    where: {
+      followerId: userId,
+      followingId: targetUserId,
+    },
+  })
+
+  // Verificar si existe el seguir en el usuario
+  if (existingFollow) {
+    await prisma.follow.delete({
+      where: { id: existingFollow.id }
+    })
+  } else {
+    await prisma.follow.create({
+      data: { followerId: userId, followingId: targetUserId }
+    })
+  }
+}
+
 /* Agregar un comentario al post */
 export const addComment = async (prevState: { success: boolean; error: boolean }, formData: FormData) => { // prevState: Estado anterior de la acción, y es opcional si no se necesita gestionar el flujo previo
   const { userId } = await auth()

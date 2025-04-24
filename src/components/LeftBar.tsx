@@ -1,5 +1,8 @@
 import Link from "next/link"
 import Image from "./Image"
+import Socket from "./Socket"
+import Notification from "./Notification";
+import { currentUser } from "@clerk/nextjs/server";
 
 const menuList = [
   {
@@ -14,12 +17,12 @@ const menuList = [
     link: "/",
     icon: "explore.svg",
   },
-  {
-    id: 3,
-    name: "Notification",
-    link: "/",
-    icon: "notification.svg",
-  },
+  // {
+  //   id: 3,
+  //   name: "Notification",
+  //   link: "/",
+  //   icon: "notification.svg",
+  // },
   {
     id: 4,
     name: "Messages",
@@ -64,7 +67,9 @@ const menuList = [
   },
 ];
 
-export default function LeftBar() {
+export default async function LeftBar() {
+  const user = await currentUser()
+
   return (
     <div className="h-screen sticky top-0 flex flex-col justify-between pt-2 pb-8">
       {/* Menú */}
@@ -81,20 +86,25 @@ export default function LeftBar() {
 
         {/* Lista del menú */}
         <div className="flex flex-col gap-4">
-          {menuList.map((item) => (
-            <Link
-              className="p-2 rounded-full hover:bg-[#181818] flex items-center gap-4"
-              href={item.link}
-              key={item.id}
-            >
-              <Image // Componente
-                path={`icons/${item.icon}`}
-                alt={item.name}
-                w={24}
-                h={24}
-              />
-              <span className="hidden xxl:inline">{item.name}</span>
-            </Link>
+          {menuList.map((item, index) => (
+            <div key={item.id || index}>
+              {index === 2 && user && (
+                <Notification /> // Componente
+              )}
+
+              <Link
+                className="p-2 rounded-full hover:bg-[#181818] flex items-center gap-4"
+                href={item.link}
+              >
+                <Image // Componente
+                  path={`icons/${item.icon}`}
+                  alt={item.name}
+                  w={24}
+                  h={24}
+                />
+                <span className="hidden xxl:inline">{item.name}</span>
+              </Link>
+            </div>
           ))}
         </div>
 
@@ -116,6 +126,8 @@ export default function LeftBar() {
           href="/compose/post"
         >Post</Link>
       </div>
+
+      <Socket /> {/* Componente */}
 
       {/* Usuario */}
       <div className="flex items-center justify-between">

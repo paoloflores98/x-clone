@@ -14,7 +14,7 @@ interface Props {
 }
 
 export default async function StatusPage({ params }: Props) {
-  const { userId } = await auth()
+  const { userId } = await auth() // Obtener el ID del usuario desde Clerk
   const { postId } = await params
 
   if (!userId) return

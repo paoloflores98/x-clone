@@ -1,8 +1,11 @@
 "use client"
 import { rePost, likePost, savePost } from "@/action"
+import { socket } from "@/socket"
+import { useUser } from "@clerk/nextjs"
 import { useOptimistic, useState } from "react"
 
 interface Props {
+  username: string
   postId: number
   count: {
     likes: number
@@ -14,7 +17,7 @@ interface Props {
   isSaved: boolean
 }
 
-export default function PostInteractions({ postId, count, isLiked, isRePosted, isSaved }: Props) {
+export default function PostInteractions({ username, postId, count, isLiked, isRePosted, isSaved }: Props) {
   const [state, setState] = useState({
     likes: count.likes,
     rePosts: count.rePosts,
@@ -23,7 +26,23 @@ export default function PostInteractions({ postId, count, isLiked, isRePosted, i
     isSaved,
   })
 
+  const { user } = useUser()
+
   const rePostAction = async () => {
+    if (!user) return
+
+    // Socket.io
+    if (!optimisticCount.isRePosted) {
+      socket.emit("sendNotification", {
+        receiverUsername: username,
+        data: {
+          senderUsername: user.username,
+          type: "rePost",
+          link: `/${username}/status/${postId}`,
+        },
+      })
+    }
+
     addOptimisticCount("rePost")
     await rePost(postId) // Server action que se realiza realmente en el backend
     setState(prev => {
@@ -36,6 +55,20 @@ export default function PostInteractions({ postId, count, isLiked, isRePosted, i
   }
   
   const likeAction = async () => {
+    if (!user) return
+
+    // Socket.io
+    if (!optimisticCount.isLiked) {
+      socket.emit("sendNotification", {
+        receiverUsername: username,
+        data: {
+          senderUsername: user.username,
+          type: "like",
+          link: `/${username}/status/${postId}`,
+        },
+      })
+    }
+
     addOptimisticCount("like")
     await likePost(postId) // Server action que se realiza realmente en el backend
     setState(prev => {

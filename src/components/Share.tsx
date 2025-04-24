@@ -1,5 +1,5 @@
 "use client"
-import { useActionState, useState } from "react"
+import { useActionState, useEffect, useRef, useState } from "react"
 import Image from "./Image"
 import NextImage from "next/image"
 import { ImageEditor } from "./ImageEditor"
@@ -39,10 +39,24 @@ export default function Share() {
    */
   const [state, formAction, isPending] = useActionState(addPost, { success: false, error: false })
 
+  // Obtener una referencia al formulario
+  const formRef = useRef<HTMLFormElement | null>(null)
+
+  useEffect(() => {
+    // Verificar si fue exitoso el server action addPost
+    if (state.success) {
+      formRef.current?.reset() // Reiniciar el formulario
+      setMedia(null)
+      setSettings({ type: "original", sensitive: false })
+    }
+  }, [state])
+  
+
   return (
     <form
       className="p-4 flex gap-4"
       action={formAction}
+      ref={formRef}
     >
       {/* Avatar */}
       <div className="relative w-10 h-10 rounded-full overflow-hidden">
