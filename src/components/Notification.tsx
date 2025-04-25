@@ -16,6 +16,7 @@ export default function Notification() {
   const [open, setOpen] = useState(false)
 
   useEffect(() => {
+    // Socket.io
     socket.on("getNotification", (data: NotificationType) => {
       setNotifications((prev) => [...prev, data])
     })
@@ -23,11 +24,20 @@ export default function Notification() {
 
   const router = useRouter()
 
+  /**
+   * Limpia todas las notificaciones
+   * Cierra el dropdown
+   */
   const reset = () => {
     setNotifications([])
     setOpen(false)
   }
 
+  /**
+   * Elimina esa notificación específica del estado
+   * Cierra el dropdown
+   * Navega a la URL relacionada
+   */
   const handleClick = (notification: NotificationType) => {
     const filteredList = notifications.filter((n) => n.id !== notification.id)
     setNotifications(filteredList)
@@ -60,18 +70,18 @@ export default function Notification() {
               <>
                 <h1 className="text-xl text-textGray">Notificaciones</h1>
 
-                {notifications.map((n) => (
+                {notifications.map(notification => (
                   <div
                     className="cursor-pointer"
-                    key={n.id}
-                    onClick={() => handleClick(n)}
+                    key={notification.id}
+                    onClick={() => handleClick(notification)}
                   >
-                    <b>{n.senderUsername}</b>{" "}
-                    {n.type === "like"
+                    <b>{notification.senderUsername}</b>{" "}
+                    {notification.type === "like"
                       ? "le gustó tu post"
-                      : n.type === "rePost"
+                      : notification.type === "rePost"
                         ? "reposteó tu post"
-                        : n.type === "comment"
+                        : notification.type === "comment"
                           ? "respondió tu post"
                           : "empezó a seguirte"
                     }

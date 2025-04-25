@@ -34,11 +34,11 @@ export default function PostInteractions({ username, postId, count, isLiked, isR
     // Socket.io
     if (!optimisticCount.isRePosted) {
       socket.emit("sendNotification", {
-        receiverUsername: username,
+        receiverUsername: username, // Autor del post
         data: {
-          senderUsername: user.username,
-          type: "rePost",
-          link: `/${username}/status/${postId}`,
+          senderUsername: user.username, // Usuario que comenta
+          type: "rePost", // Tipo de notificación o evento
+          link: `/${username}/status/${postId}`, // URL para ver el comentario
         },
       })
     }

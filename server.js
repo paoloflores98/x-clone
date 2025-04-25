@@ -11,7 +11,7 @@ const handler = app.getRequestHandler() // Manejador de solicitudes de Next.js
 
 let onlineUsers = []
 
-/* ACIONES */
+/* ACCIONES */
 const addUser = (username, socketId) => {
   const isExist = onlineUsers.find(user => user.socketId === socketId)
 

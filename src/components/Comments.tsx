@@ -46,11 +46,11 @@ export default function Comments({ comments, postId, username }: Props) {
     if (state.success) {
       // Socket.io
       socket.emit("sendNotification", {
-        receiverUsername: username,
+        receiverUsername: username, // Autor del post
         data: {
-          senderUsername: user?.username,
-          type: "comment",
-          link: `/${username}/status/${postId}`,
+          senderUsername: user?.username, // Usuario que comenta
+          type: "comment", // Tipo de notificación o evento
+          link: `/${username}/status/${postId}`, // URL para ver el comentario
         },
       })
     }

@@ -4,6 +4,7 @@ import PostInteractions from "./PostInteractions"
 import Link from "next/link"
 import { Post as PostType } from "@prisma/client"
 import { format } from "timeago.js"
+import Video from "./Video"
 
 type UserSummary = {
   displayName: string | null
@@ -108,11 +109,21 @@ export default function Post({ type, post }: Props) {
 
           {originalPost.img && (
             <Image // Componente
+              className={originalPost.isSensitive ? "blur-3xl" : ""}
               path={originalPost.img}
               alt=""
               w={600}
               h={originalPost.imgHeight || 600}
             />
+          )}
+
+          {originalPost.video && (
+            <div className="rounded-lg overflow-hidden">
+              <Video
+                path={originalPost.video}
+                className={originalPost.isSensitive ? "blur-3xl" : ""}
+              />
+            </div>
           )}
 
           {type === "status" && (
